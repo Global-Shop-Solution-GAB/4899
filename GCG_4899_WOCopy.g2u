@@ -1,0 +1,245 @@
+Program.Sub.ScreenSU.Start
+Gui.Form..Create
+Gui.Form..Caption("Copy Work Order")
+Gui.Form..Size(4665,2445)
+Gui.Form..MinX(0)
+Gui.Form..MinY(0)
+Gui.Form..Position(0,0)
+Gui.Form..BackColor(-2147483633)
+Gui.Form..MousePointer(0)
+Gui.Form..Event(UnLoad,Form_UnLoad)
+Gui.Form.lblWOFrom.Create(Label,"Work Order From",True,1935,255,0,180,420,True,0,"Arial",8,-2147483633,0)
+Gui.Form.lblWOTo.Create(Label,"Work Order To",True,1935,255,0,2415,420,True,0,"Arial",8,-2147483633,0)
+Gui.Form.txtWOFrom.Create(TextBox,"",True,1215,300,0,180,705,True,0,"Arial",8,-2147483643,1)
+Gui.Form.txtWOTo.Create(TextBox,"",True,1215,300,0,2415,735,True,0,"Arial",8,-2147483643,1)
+Gui.Form.cmdWOFROMBRWSE.Create(Button)
+Gui.Form.cmdWOFROMBRWSE.Size(495,345)
+Gui.Form.cmdWOFROMBRWSE.Position(1530,690)
+Gui.Form.cmdWOFROMBRWSE.Caption("^")
+Gui.Form.cmdWOFROMBRWSE.Event(Click,cmdWOFROMBRWSE_Click)
+Gui.Form.cmdCopy.Create(Button)
+Gui.Form.cmdCopy.Size(855,375)
+Gui.Form.cmdCopy.Position(180,1290)
+Gui.Form.cmdCopy.Caption("Copy")
+Gui.Form.cmdCopy.Event(Click,cmdCopy_Click)
+Gui.Form.cmdWOTOBRWSE.Create(Button)
+Gui.Form.cmdWOTOBRWSE.Size(495,345)
+Gui.Form.cmdWOTOBRWSE.Position(3765,720)
+Gui.Form.cmdWOTOBRWSE.Caption("^")
+Gui.Form.cmdWOTOBRWSE.Event(Click,cmdWOTOBRWSE_Click)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+
+'Coded by: WAW
+'Date: 12/20/17
+'Custom form to allow users to copy info from one WO to another
+
+'open the connection
+F.ODBC.Connection!conx.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass)
+
+gui.Form..Visible(true)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4899_WOCopy.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.CallSub(form_unload)
+Function.Intrinsic.Control.EndIf
+
+Program.Sub.Main.End
+
+Program.Sub.cmdWOFROMBRWSE_Click.Start
+F.Intrinsic.Control.SetErrorHandler("cmdWOFROMBRWSE_Click_Err")
+F.Intrinsic.Control.ClearErrors
+
+v.Local.sret.declare(String)
+Variable.Local.sTemp.Declare(string)
+Variable.Local.sTitles.Declare(string)
+Variable.Local.iWidths.Declare(long)
+
+Function.Intrinsic.UI.SetBrowserHotTypeAhead(True)
+
+'browser for the from work order
+Function.Intrinsic.String.Split("Job*!*Suffix*!*Part*!*Description*!*Customer*!*Due Date","*!*",variable.local.sTitles)
+Function.Intrinsic.String.Split("1000*!*800*!*2000*!*3000*!*800*!*1000","*!*",variable.local.iWidths)
+Function.Intrinsic.UI.Browser("Select a job","conx","Select Job, Suffix, Part, Description, Customer, Date_Due From V_JOB_HEADER",Variable.Local.sTitles,Variable.Local.iWidths,Variable.Local.sRet)
+Function.Intrinsic.Control.If(Variable.Local.sRet,"=","***CANCEL***")
+	 Function.Intrinsic.UI.Msgbox("No job was selected!")
+Function.Intrinsic.Control.Else
+ Function.Intrinsic.String.Split(Variable.Local.sRet,"*!*",Variable.Local.sRet)
+	gui.Form.txtWOFrom.Text(v.Local.sret(0))
+	gui.Form.txtWOTo.Text(v.Local.sret(0))
+Function.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.Label("cmdWOFROMBRWSE_Click_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4899_WOCopy.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.CallSub(form_unload)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.cmdWOFROMBRWSE_Click.End
+
+Program.Sub.cmdWOTOBRWSE_Click.Start
+F.Intrinsic.Control.SetErrorHandler("cmdWOTOBRWSE_Err")
+F.Intrinsic.Control.ClearErrors
+v.Local.sret.declare(String)
+Variable.Local.sTemp.Declare(string)
+Variable.Local.sTitles.Declare(string)
+Variable.Local.iWidths.Declare(long)
+
+Function.Intrinsic.UI.SetBrowserHotTypeAhead(True)
+
+'browser for the to work order
+Function.Intrinsic.String.Split("Job*!*Suffix*!*Part*!*Description*!*Customer*!*Due Date","*!*",variable.local.sTitles)
+Function.Intrinsic.String.Split("1000*!*800*!*2000*!*3000*!*800*!*1000","*!*",variable.local.iWidths)
+Function.Intrinsic.UI.Browser("Select a job","conx","Select Job, Suffix, Part, Description, Customer, Date_Due From V_JOB_HEADER",Variable.Local.sTitles,Variable.Local.iWidths,Variable.Local.sRet)
+Function.Intrinsic.Control.If(Variable.Local.sRet,"=","***CANCEL***")
+	 Function.Intrinsic.UI.Msgbox("No job was selected!")
+Function.Intrinsic.Control.Else
+ Function.Intrinsic.String.Split(Variable.Local.sRet,"*!*",Variable.Local.sRet)
+	gui.Form.txtWOTo.Text(v.Local.sret(0))
+Function.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.Label("cmdWOTOBRWSE_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4899_WOCopy.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.CallSub(form_unload)
+Function.Intrinsic.Control.EndIf
+
+Program.Sub.cmdWOTOBRWSE_Click.End
+
+Program.Sub.Form_UnLoad.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	gui.Form..Visible(fase)
+	F.ODBC.Connection!conx.Close
+	F.Intrinsic.Control.End 
+	
+
+F.Intrinsic.Control.Label("Form_Unload_Err")	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: GCG_4899_WOCopy.g2u{0}{0}Subroutine: {1}{0}Error Occurred {2} with description {3}.",V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.Form_UnLoad.End
+Program.Sub.cmdCopy_Click.Start
+F.Intrinsic.Control.SetErrorHandler("cmdCopy_Click_Err")
+F.Intrinsic.Control.ClearErrors
+
+v.Local.sfromwo.Declare(string)
+v.Local.stowo.Declare(String)
+v.Local.ifrom.Declare(long)
+v.Local.sret.Declare(string)
+v.Local.ito.Declare(long)
+v.Local.ssql.Declare(string)
+
+'set the local variables
+v.Local.sfromwo.Set(v.Screen.Form!txtWOFrom.text)
+v.Local.stowo.Set(v.Screen.Form!txtWOTo.text)
+
+'JOB_HEADER
+V.Local.iFrom.Set(0)
+V.Local.iTo.Set(0)
+
+'JOB HEADER
+F.Intrinsic.String.Build("SELECT * FROM JOB_HEADER WHERE JOB = '{0}'",V.Local.sfromwo,V.Local.sSQL)
+f.Data.DataTable.CreateFromSQL("DTJOBHEADER","conx",v.Local.ssql)
+
+'delete the job header information for the to job and insert info from the from job to the to job
+'f.Intrinsic.String.Build("delete from JOB_HEADER where JOB = '{0}'",v.Local.sfromwo.Trim,v.Local.ssql)
+'F.ODBC.Connection!conx.Execute(V.Local.sSQl)
+
+f.Intrinsic.String.Build("delete from JOB_HEADER where JOB = '{0}'",v.Local.stowo.Trim,v.Local.ssql)
+F.ODBC.Connection!conx.Execute(V.Local.sSQl)
+
+'loop through and set the job number
+f.Intrinsic.Control.For(v.Local.ito,0,v.DataTable.DTJOBHEADER.RowCount--,1)
+	f.Data.DataTable.SetValue("DTJOBHEADER",v.Local.ito,"JOB",v.Screen.Form!txtWOTo.text)
+f.Intrinsic.Control.Next(v.Local.ito)
+
+f.Data.DataTable.SaveToDB("DTJOBHEADER","conx","JOB_HEADER","",128)
+
+'JOB OPERATIONS
+F.Intrinsic.String.Build("SELECT * FROM JOB_OPERATIONS WHERE JOB = '{0}'",V.Local.sfromwo,V.Local.sSQL)
+f.Data.DataTable.CreateFromSQL("DTJOBOPER","conx",v.Local.ssql)
+
+'delete the job operation information for the to job and insert info from the from job to the to job
+f.Intrinsic.String.Build("delete from JOB_OPERATIONS where JOB = '{0}'",v.Local.stowo.Trim,v.Local.ssql)
+F.ODBC.Connection!conx.Execute(V.Local.sSQl)
+
+f.Intrinsic.String.Build("delete from JOB_OPERATIONS where JOB = '{0}' and LMO = 'L'",v.Local.sfromwo.Trim,v.Local.ssql)
+F.ODBC.Connection!conx.Execute(V.Local.sSQl)
+
+f.Intrinsic.String.Build("delete from JOB_OPERATIONS where JOB = '{0}' and LMO = 'M'",v.Local.sfromwo.Trim,v.Local.ssql)
+F.ODBC.Connection!conx.Execute(V.Local.sSQl)
+
+v.Local.ito.Set(0)
+
+'loop through and set the job number
+f.Intrinsic.Control.For(v.Local.ito,0,v.DataTable.DTJOBOPER.RowCount--,1)
+	f.Data.DataTable.SetValue("DTJOBOPER",v.Local.ito,"JOB",v.Screen.Form!txtWOTo.text)
+f.Intrinsic.Control.Next(v.Local.ito)
+f.Data.DataTable.SaveToDB("DTJOBOPER","conx","JOB_OPERATIONS","",128)
+
+'JOB DETAIL
+F.Intrinsic.String.Build("SELECT * FROM JOB_DETAIL WHERE JOB = '{0}'",V.Local.sfromwo,V.Local.sSQL)
+f.Data.DataTable.CreateFromSQL("DTJOBDETAIL","conx",v.Local.ssql)
+
+'delete the job detail information for the to job and insert info from the from job to the to job
+f.Intrinsic.String.Build("delete from JOB_DETAIL where JOB = '{0}'",v.Local.stowo.Trim,v.Local.ssql)
+F.ODBC.Connection!conx.Execute(V.Local.sSQl)
+
+f.Intrinsic.String.Build("delete from JOB_DETAIL where JOB = '{0}' and LMO = 'L'",v.Local.sfromwo.Trim,v.Local.ssql)
+F.ODBC.Connection!conx.Execute(V.Local.sSQl)
+
+f.Intrinsic.String.Build("delete from JOB_DETAIL where JOB = '{0}' and LMO = 'M'",v.Local.sfromwo.Trim,v.Local.ssql)
+F.ODBC.Connection!conx.Execute(V.Local.sSQl)
+
+'loop through and set the job number
+f.Intrinsic.Control.For(v.Local.ito,0,v.DataTable.DTJOBDETAIL.RowCount--,1)
+	f.Data.DataTable.SetValue("DTJOBDETAIL",v.Local.ito,"JOB",v.Screen.Form!txtWOTo.text)
+f.Intrinsic.Control.Next(v.Local.ito)
+
+f.Data.DataTable.SaveToDB("DTJOBDETAIL","conx","JOB_DETAIL","",128)
+
+'JOB_COMMITMENTS
+F.Intrinsic.String.Build("SELECT * FROM JOB_COMMITMENTS WHERE JOB = '{0}'",V.Local.sfromwo,V.Local.sSQL)
+f.Data.DataTable.CreateFromSQL("DTJOBCOMMIT","conx",v.Local.ssql)
+
+'delete the job detail commitment for the to job and insert info from the from job to the to job
+f.Intrinsic.String.Build("delete from JOB_COMMITMENTS where JOB = '{0}'",v.Local.stowo.Trim,v.Local.ssql)
+F.ODBC.Connection!conx.Execute(V.Local.sSQl)
+
+'f.Intrinsic.String.Build("delete from JOB_COMMITMENTS where JOB = '{0}'",v.Local.sfromwo.Trim,v.Local.ssql)
+'F.ODBC.Connection!conx.Execute(V.Local.sSQl)
+
+'loop through and set the job number
+f.Intrinsic.Control.For(v.Local.ito,0,v.DataTable.DTJOBCOMMIT.RowCount--,1)
+	f.Data.DataTable.SetValue("DTJOBCOMMIT",v.Local.ito,"JOB",v.Screen.Form!txtWOTo.text)
+f.Intrinsic.Control.Next(v.Local.ito)
+f.Data.DataTable.SaveToDB("DTJOBCOMMIT","conx","JOB_COMMITMENTS","",128)
+
+f.Intrinsic.Control.CallSub(form_Unload)
+
+F.Intrinsic.Control.Label("cmdCopy_Click_Err")
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: GCG_4899_WOCopy.g2u{0}{0}Subroutine: {1}{0}Error Occurred {2} with description {3}.",V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(form_unload)
+F.Intrinsic.Control.EndTry
+Program.Sub.cmdCopy_Click.End
+
+
